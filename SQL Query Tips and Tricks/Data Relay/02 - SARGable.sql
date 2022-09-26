@@ -5,8 +5,8 @@ IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Production_Product_Name')
 DROP INDEX Production.Product.IX_Production_Product_Name
 GO
 
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'AK_Product_Name')
-DROP INDEX [AK_Product_Name] ON [Production].[Product]
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'PK_Product_Name')
+DROP INDEX [PK_Product_Name] ON [Production].[Product]
 GO
 
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Production_Product_NameLastLetter')
@@ -21,20 +21,12 @@ ALTER TABLE Production.Product DROP COLUMN NameLastLetter
 GO
 -- end set up
 
-SET STATISTICS TIME, IO ON;
-
-DBCC DROPCLEANBUFFERS;
-DBCC FREEPROCCACHE;
-
 -- find all products that begin with 'S'
 SELECT	ProductID, Name
 FROM	Production.Product
 WHERE	Name LIKE N'S%';
 
 CREATE NONCLUSTERED INDEX IX_Production_Product_Name ON Production.Product(Name)
-
-DBCC DROPCLEANBUFFERS;
-DBCC FREEPROCCACHE;
 
 -- what happens when we run:
 SELECT	ProductID, Name
@@ -62,6 +54,9 @@ WHERE	Name = N'Paint - Yellow';
 
 ALTER TABLE Production.Product ADD NameLastLetter AS RIGHT(Name, 1);
 
+SELECT	TOP 100 Name, NameLastLetter
+FROM	Production.Product
+
 CREATE INDEX IX_Production_Product_NameLastLetter ON Production.Product (NameLastLetter) INCLUDE (Name);
 
 SELECT	Name
@@ -70,7 +65,15 @@ WHERE	NameLastLetter = N'W';
 
 
 
--- but you get a seek even with a function!
+-- but what happens with the original query?
 SELECT	Name
 FROM	Production.Product
 WHERE	RIGHT(Name, 1) = N'W';
+
+
+
+
+
+
+
+-- you get a seek even with a function!

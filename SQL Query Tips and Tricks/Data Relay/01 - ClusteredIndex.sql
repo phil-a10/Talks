@@ -12,14 +12,6 @@ FROM [Production].[TransactionHistory]
 
 -- end set-up
 
--- lets see some performance metrics
-SET STATISTICS TIME, IO ON;
-
--- lets level the playing field
--- don't run these on production systems!
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
-
 -- A table with no clustered index is known as a heap
 -- often this is 'bad' ie inefficient:
 
@@ -38,16 +30,10 @@ WHERE	TransactionID = 186237;
 ALTER TABLE [Production].[TransactionHistoryHeap] ADD CONSTRAINT PK_TransactionHistoryHeap_TransactionID PRIMARY KEY (TransactionID ASC);
 GO
 
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
-
 -- this query is much better:
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionID = 186237;
-
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
 
 -- however:
 SELECT	TransactionID, ProductID, Quantity, ActualCost
@@ -76,9 +62,6 @@ ALTER TABLE [Production].[TransactionHistoryHeap] DROP CONSTRAINT [PK_Transactio
 GO
 
 CREATE NONCLUSTERED INDEX IX_TransactionHistory_TransactionDate ON [Production].[TransactionHistoryHeap] (TransactionDate ASC)
-
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
 
 -- So it should use the Index if we put Date in the predicate right?
 SELECT	TransactionID, ProductID, Quantity, ActualCost

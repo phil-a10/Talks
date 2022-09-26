@@ -40,6 +40,8 @@ EXEC sp_spaceused 'Comments_CCIX'
 
 SET STATISTICS IO, TIME ON;
 
+-- lets level the playing field
+-- don't run these on production systems!
 DBCC DROPCLEANBUFFERS;
 DBCC FREEPROCCACHE;
 

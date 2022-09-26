@@ -3,7 +3,7 @@ USE AdventureWorks2019;
 --what does nolock actually do?
 
 -- demo:
--- where using explicit transactions here to slow everything down - but its the same principal when considering any SQL
+-- we're using explicit transactions here to slow everything down - but its the same principal when considering any SQL
 -- remember: all SQL is transactional
 
 

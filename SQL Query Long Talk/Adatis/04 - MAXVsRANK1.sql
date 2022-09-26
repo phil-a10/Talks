@@ -1,8 +1,8 @@
 USE AdventureWorks2019;
 
 -- set-up
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Production_Product_NameLastLetter')
-DROP INDEX [IX_TransactionHistory_ProductID_01]
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TransactionHistory_ProductID_01')
+DROP INDEX [Production].[TransactionHistory].[IX_TransactionHistory_ProductID_01]
 
 
 SET STATISTICS IO, TIME ON;
@@ -38,8 +38,9 @@ INNER JOIN
 
 -- The second can also be optimised:
 
+DROP INDEX [Production].[TransactionHistory].[IX_TransactionHistory_ProductID_01]
 CREATE NONCLUSTERED INDEX [IX_TransactionHistory_ProductID_01]
-ON [Production].[TransactionHistory] ([ProductID],[TransactionDate])
+ON [Production].[TransactionHistory] ([TransactionDate], [ProductID])
 
 DBCC DROPCLEANBUFFERS;
 DBCC FREEPROCCACHE;

@@ -1,4 +1,4 @@
--- Indexing
+-- Heaps/Indexing
 
 -- set-up:
 USE AdventureWorks2019;
@@ -11,14 +11,6 @@ INTO [Production].[TransactionHistoryHeap]
 FROM [Production].[TransactionHistory]
 
 -- end set-up
-
--- lets see some performance metrics
-SET STATISTICS TIME, IO ON;
-
--- lets level the playing field
--- don't run these on production systems!
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
 
 -- A table with no clustered index is known as a heap
 -- often this is 'bad' ie inefficient:
@@ -35,19 +27,13 @@ WHERE	TransactionID = 186237;
 
 -- Clustered - often implemented as a PK:
 -- Note that for clustered indexes the table is the index and vice-versa
-ALTER TABLE [Production].[TransactionHistoryHeap] ADD CONSTRAINT PK_TransactionHistoryHeap_TransactionID PRIMARY KEY CLUSTERED (TransactionID ASC);
+ALTER TABLE [Production].[TransactionHistoryHeap] ADD CONSTRAINT PK_TransactionHistoryHeap_TransactionID PRIMARY KEY (TransactionID ASC);
 GO
-
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
 
 -- this query is much better:
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionID = 186237;
-
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
 
 -- however:
 SELECT	TransactionID, ProductID, Quantity, ActualCost
@@ -59,8 +45,12 @@ WHERE	TransactionDate > '20131231';
 
 
 
+
+
+
+
+
 -- Note that in this query performance is basically the same
--- Note also that in this example is more realistic for the average data engineer
 -- clustered indexes will have linked pages whereas heap tables do not
 -- linked pages theoretically make sequential reads faster on large tables but YMMV
 -- there are of course other reasons to have a PK on a table
@@ -77,6 +67,11 @@ CREATE NONCLUSTERED INDEX IX_TransactionHistory_TransactionDate ON [Production].
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionDate > '20131231';
+
+
+
+
+
 
 
 
@@ -122,6 +117,10 @@ SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionDate > '20131231';
 
+SELECT	TransactionID, ActualCost, TransactionType
+FROM	[Production].[TransactionHistoryHeap]
+WHERE	TransactionDate > '20131231';
 
 -- often this sort of indexing pattern is used on fact tables
-
+-- avoid heaps unless you always query all the data in a table
+-- clustered indexes do have downsides - updates and inserts
