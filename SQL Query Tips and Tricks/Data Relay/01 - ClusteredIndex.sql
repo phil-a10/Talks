@@ -35,7 +35,7 @@ SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionID = 186237;
 
--- however:
+-- But what about this:
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionDate > '20131231';
@@ -89,9 +89,6 @@ DROP INDEX [Production].[TransactionHistoryHeap].IX_TransactionHistory_Transacti
 CREATE NONCLUSTERED INDEX IX_TransactionHistoryHeap_TransactionDate ON [Production].[TransactionHistoryHeap] (TransactionDate ASC) 
 	INCLUDE (TransactionID, ProductID, Quantity, ActualCost)
 
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
-
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
 WHERE	TransactionDate > '20131231';
@@ -126,4 +123,4 @@ WHERE	TransactionDate > '20131231';
 
 -- often this sort of indexing pattern is used on fact tables
 -- avoid heaps unless you always query all the data in a table
--- clustered indexes do have downsides - updates and inserts
+-- indexes do have downsides - updates and inserts

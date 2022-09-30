@@ -21,9 +21,9 @@ FROM
 	) ProductHistory
 WHERE ProductRank = 1
 
+
+
 -- this forces a sort and requires a memory grant
-
-
 
 
 -- BUT consider doing this instead:
@@ -38,9 +38,7 @@ INNER JOIN
 					ProductID
 			) maxth ON th.ProductID = maxth.ProductID AND th.TransactionDate = maxth.MaxTransactionDate;
 
--- Note that the second does not force a sort
-
--- The second can also be optimised:
+-- This can be optimised:
 
 CREATE NONCLUSTERED INDEX [IX_TransactionHistory_ProductID_01]
 ON [Production].[TransactionHistory] ([ProductID],[TransactionDate])

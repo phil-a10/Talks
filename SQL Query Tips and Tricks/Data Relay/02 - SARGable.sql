@@ -76,4 +76,4 @@ WHERE	RIGHT(Name, 1) = N'W';
 
 
 
--- you get a seek even with a function!
+-- still sargeable even with a function!
