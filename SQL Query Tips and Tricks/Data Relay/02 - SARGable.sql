@@ -41,10 +41,6 @@ SELECT	ProductID, Name
 FROM	Production.Product
 WHERE	RIGHT(Name, 1) = N'W';
 
-SELECT	ProductID, Name
-FROM	Production.Product
-WHERE	Name LIKE N'%W';
-
 -- so try and find an alternative that is SARGable:
 SELECT	ProductID, Name
 FROM	Production.Product
@@ -62,7 +58,6 @@ CREATE INDEX IX_Production_Product_NameLastLetter ON Production.Product (NameLas
 SELECT	Name
 FROM	Production.Product
 WHERE	NameLastLetter = N'W';
-
 
 
 -- but what happens with the original query?

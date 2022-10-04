@@ -38,7 +38,7 @@ INNER JOIN
 					ProductID
 			) maxth ON th.ProductID = maxth.ProductID AND th.TransactionDate = maxth.MaxTransactionDate;
 
--- This can be optimised:
+-- This also causes a sort but this can be optimised:
 
 CREATE NONCLUSTERED INDEX [IX_TransactionHistory_ProductID_01]
 ON [Production].[TransactionHistory] ([ProductID],[TransactionDate])
