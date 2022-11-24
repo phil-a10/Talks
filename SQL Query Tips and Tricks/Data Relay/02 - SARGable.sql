@@ -26,7 +26,8 @@ SELECT	ProductID, Name
 FROM	Production.Product
 WHERE	Name LIKE N'S%';
 
-CREATE NONCLUSTERED INDEX IX_Production_Product_Name ON Production.Product(Name)
+CREATE NONCLUSTERED INDEX IX_Production_Product_Name 
+ON Production.Product(Name)
 
 -- what happens when we run:
 SELECT	ProductID, Name

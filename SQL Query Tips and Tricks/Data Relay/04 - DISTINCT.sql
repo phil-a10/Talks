@@ -3,11 +3,7 @@ USE AdventureWorks2019;
 SET STATISTICS IO, TIME ON;
 
 -- Requirement: All employees, rates, joined before 1/1/2010
-
 -- Following naive join returns duplicates:
-DBCC FREEPROCCACHE; 
-DBCC DROPCLEANBUFFERS; 
-
 
 SELECT	eph.BusinessEntityID,
 		p.NameStyle,

@@ -21,11 +21,6 @@ WHERE CommentRank = 1
 
 -- there is a spill on the sort operator - the memory grant is sizeable!
 
--- to save time I've already run this:
-CREATE NONCLUSTERED INDEX [IX_Comments_CCIX_UserID_01]
-ON dbo.Comments_CCIX ([UserID], [CreationDate])
-INCLUDE ([Score]);
-
 DBCC DROPCLEANBUFFERS;
 DBCC FREEPROCCACHE;
 

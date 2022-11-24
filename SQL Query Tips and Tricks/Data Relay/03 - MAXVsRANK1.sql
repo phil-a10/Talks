@@ -3,7 +3,7 @@ USE AdventureWorks2019;
 -- set-up
 IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Production_Product_NameLastLetter')
 DROP INDEX [Production].[TransactionHistory].[IX_TransactionHistory_ProductID_01]
-
+--end set-up
 
 SET STATISTICS IO, TIME ON;
 
@@ -23,8 +23,9 @@ WHERE ProductRank = 1
 
 
 
--- this forces a sort and requires a memory grant
 
+-- this forces a sort and requires a memory grant
+-- all queries require memory but not all require a memory grant
 
 -- BUT consider doing this instead:
 SELECT th.ProductID, TransactionDate, TransactionType

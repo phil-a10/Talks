@@ -13,13 +13,14 @@ IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'TransactionHistoryHeap')
 DROP TABLE [Production].[TransactionHistoryHeap] 
 -- end set-up
 
+-- create a 'heap'
 SELECT * 
 INTO [Production].[TransactionHistoryHeap] 
 FROM [Production].[TransactionHistory]
 
 
 -- A table with no clustered index is known as a heap
--- often this is 'bad' ie inefficient:
+-- this can be 'bad' ie inefficient:
 
 SELECT	TransactionID, ProductID, Quantity, ActualCost
 FROM	[Production].[TransactionHistoryHeap]
