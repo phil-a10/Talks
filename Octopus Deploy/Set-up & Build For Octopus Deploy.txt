@@ -1,0 +1,82 @@
+Build automation for database projects with MSBuild, OctoPack, and Octopus deploy
+
+P Austin
+
+1. Install Visual Studio 2015 or SSDT.
+
+2. Run VS/SSDT. Install NuGet Package Manager via Tools > Extensions and Updates. Restart VS/SSDT
+
+3. Open the database project you want to deploy
+
+4. Open Package Manager Console via Tools > Package Manager > Package Manager Console
+
+5. From the console install OctoPack into the project by running 'Install-Package OctoPack'. Make a note of the version number installed.
+
+6. Edit the .sqlproj project file and add the following xml at the bottom before the </Project> tag
+
+<Import Project=".\packages\OctoPack.<Octopack version number>\tools\<project name>.targets" Condition="Exists('.\packages\OctoPack.<Octopack version number>\tools\<project name>.targets')" />
+  <Target Name="EnsureOctoPackImported" BeforeTargets="BeforeBuild" Condition="'$(OctoPackImported)' == ''">
+    <Error Condition="!Exists('.\packages\OctoPack.<Octopack version number>\tools\<project name>.targets') And ('$(RunOctoPack)' != '' And $(RunOctoPack))" Text="You are trying to build with OctoPack, but the NuGet targets file that OctoPack depends on is not available on this computer. This is probably because the OctoPack package has not been committed to source control, or NuGet Package Restore is not enabled. Please enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('.\packages\OctoPack.<Octopack version number>\tools\OctoPack.targets') And ('$(RunOctoPack)' != '' And $(RunOctoPack))" Text="OctoPack cannot be run because NuGet packages were restored prior to the build running, and the targets file was unavailable when the build started. Please build the project again to include these packages in the build. You may also need to make sure that your build server does not delete packages prior to each build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
+  
+ Replace '<Octopack version number>' with the version installed in step 5. Replace '<project name>' with the name of the database/ssis/ssas project.
+  
+7. Create a nuspec file and add it to the project. The nuspec file is a manifest to tell Octopack what to include in the nuget package. It should look something like this:
+ 
+ <?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>EMIS.Database.<project name></id>
+    <version>1.0.0.0</version>
+    <authors>Phil Austin</authors>
+    <description>NuGet package for DB</description>
+  </metadata>
+  <files>
+    <file src=".\bin\Debug\<project name>.dacpac" />
+    <file src="<publish profile file name>"/>
+  </files>
+</package>
+ 
+Replace <project name> with the db project name and <publish profile file name> with the name of the publish profile name (include the file extension).
+
+7. Add a file called AssembyInfo.cs move it into the 'properties' folder of the database project, and copy and paste the following into it:
+
+using System.Reflection;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+[assembly: AssemblyTitle("<project name>")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("project name")]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// [assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyFileVersion("1.0.0.1")]
+
+Replace <project name> with the name of the database project
+
+8. Build the database project.
+
+9. Build, create the nuget package and push the package to Octopus Deploy by running the following MSBuild command:
+
+C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe "<solution file location>" /p:RunOctoPack=true /p:OctoPackPublishPackageToHttp=http://<Octopus Deploy Server name>/OctopusDeploy/nuget/packages /p:OctoPackPublishApiKey=<API Key (found in Octopus deploy under your profile)>
+API-VFKGAVZPWNTJHUIM7NYKRDJG
+
+Build automation for SSIS projects
+
+1. As there is no support native for MSBuild for SSIS projects there are two options:
+	- hack MSBuild support, using a pretty convoluted-looking process here: https://speaksql.wordpress.com/2013/06/07/a-journey-to-db-deployment-automaton-ssis-build-using-msbuild/
+	- use devenv and octo from the command-line; devenv to do the initial build and octo to package and push into the Octopus server

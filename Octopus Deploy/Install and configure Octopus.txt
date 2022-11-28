@@ -1,0 +1,57 @@
+﻿Octopus Deploy install
+
+Architecture of Octopus
+The Octopus server is software that you download and install on one of your servers. Most people set up a virtual machine, or install it on the same server that hosts their automated build server. 
+
+There are a few parts to an Octopus server: 
+•	A SQL Server database - this could be SQL Server Express Edition on the same server as Octopus, or a dedicated SQL Server instance (details)
+•	A Windows service - Octopus runs as a Windows Service, and presents most of its UI via HTTP
+•	Octopus Manager - this is a utility application that's used to set up and administer the Octopus service
+
+
+1. Install and configure Octopus Deploy server. 
+
+Pre-requisites:
+
+    Windows Server 2008 SP2+, 2008 R2, 2012, 2012 R2 or 2016 ("Server with a GUI" install, not Server Core)
+    .NET Framework 4.5+ (download)
+        .NET Framework 4.5.1+ for Octopus Server 3.4.0 and later
+    SQL Server installed locally or on another server, or Microsoft Azure SQL Database (more details)
+    Hardware:
+        Absolute minimum to make it run: 512MB RAM, 1GHz CPU, 2GB free disk space
+        Recommended for smaller deployments (less than 30 Tentacles for example): 2GB RAM, dual-core CPU, 10GB free disk space
+        Recommended for larger deployments: 4GB RAM, dual-core, 20GB free disk space
+
+There is an msi to run here: https://octopus.com/downloads. It will need a virtual folder name for the web portal ('OctopusDeploy' is recommended), a SQL connection to run the OctopusDeploy database, and an account to run the service (local accounts are fine but you will need to take into account the fact that Octopus will be running stuff on the machine). Instructions can be found here: http://docs.octopusdeploy.com/display/OD/Installing+Octopus?__s=v6xacjcsdgnfaq3k5pjy
+
+2. Install an Octopus Tentacle on machines that you want to deploy to. This is also an msi found here: https://octopus.com/downloads. This also runs as a service - so the considerations around accounts running the service in 1. also apply here. You will also need to choose a communication method. 'Listener' is recommended unless you are limited to making outbound connections from the installation machine in which case choose polling. For polling remember that the server will need to have a port open to accept the tentacle requests - this includes Windows firewall and any other firewalls or network scurity (ie Azure Network Security Groups). The default port is 10943. 
+
+3. In the Octopus Manager application click on the portal link (top left) to open the web portal.
+
+4. You have to ensure that the Tentacle trusts Octopus. This is configured by getting a 'thumb-print' from the 'Environments' section of the portal and adding it to the tentacle installed in 2. Copy the thumb-print from the Environments section to the Tentacle manager on the machine used to install the tentacle.
+
+5.  Configure the Environment. Click the 'Environments' tab and give it a name that makes sense ie 'Development', 'Test' etc. Hit 'Save'
+
+6. Add deployment targets to the environment. From the Environment created in 4 click the 'Add deployment target button'. Assuming you chose 'Listener' in step 2 choose a 'Listening Tentacle'. Then add the name of the target server you installed the tentacle on in 2 and the port it is listening on (default is 10933). Then give the deployment target a name (ie 'Development - SQL') and a role ('Database'). Roles are a useful way of grouping targets and enable you to deploy to all roles within an environment. Hit 'Save'.
+
+7. At this point you need a NuGet package to deploy to Octopus Deploy. See additional notes to get this set-up. Once this is done upload it via Library > Packages > Upload Package.
+
+8. Add a project (click the Projects tab)- this is the 'bucket' for the deployment and probably corresponds to a team project (ie 'GSTT') or maybe just a layer in the project stack (ie GSTT - Data). 
+
+9. Once the project is created you can start adding deployment steps. The first step needs to load the package loaded in step 5. Click Add step and choose 'Deploy a package'. Choose the appropriate role (ie 'Database') and in 'Package ID' the package name uploaded in 5. Lastly choose the default environment this should be deployed to. Hit 'Save'
+
+10. Add steps you need to deploy the release. For example to deploy a SQL database (assuming you have packaged up a dacpac and publish profile in step 6.) add a step and from the 'community created step templates' choose 'SQL - Deploy DACPAC'. Fill in the step as appropriate, providing the DACPAC file name and publish profile (use the full filename with extension in both cases). When choosing a login bear in mind local service accounts won't have access to SQL by default. Make sure the 'Additional deployment contributor arguments' are left blank. Note that if you go back and alter these steps or add new ones you will have to create a new release as otherwise it will run the release using the old steps and/or settings.
+
+11. Once you've added all of your steps you are ready to release. Releases can be triggered or started manually. To start a manual release click the 'Create release' button in the project page. At this point you can give the release a release number and add release notes and can change the release package used. Hit 'Save'
+
+12. When ready click 'Deploy to <Environment name>' where <Environment name> is the default environment for the project. Click 'Deploy to...' to choose a different Environment.
+
+13. Once you have chosen the environment, you get a 'Deploy now' button. Click this to release. Octopus will then deploy the project to the Environment as configured. Progress is supplied on the page indicating success or failure. NB a yellow triangle might indicate failure - so don't ignore it! Click on each step to see more details about the release.
+
+14. To deploy automatically you need to set up a custom 'lifecycle'. Do this on the Library > Lifecycle page. From here click 'Add Lifecycle'. Give it a relevant name and description and then add a 'phase'. Then click 'Add environment' then select the relevant environment and then click the 'Deploy automatically to this environment as soon as the release enters this phase'. This will ensure that the ant project using this lifecycle will automatically deploy to this environment.
+
+15. Then the lifecycle needs to be associated with the project. To do this navigate to the project created in step 8. and open the 'Process' page then click 'Choose a different lifecycle' and select the lifecycle option created in step 14.
+
+16. Finally to ensure that the release is triggered when a package is pushed into Octopus Deploy open the 'Triggers' page and click the 'Create a release when a package is pushed to the built-in package repository'.
+
+17. Follow the instructions in 'Set up Build for Octopus deploy' to build and push a package into Octopus which then triggers the deploy.
