@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[OctopusTest]
+(
+	[Id] INT NOT NULL PRIMARY KEY,
+	Col1 DATETIME,
+	Col2 VARCHAR(50)
+	
+)

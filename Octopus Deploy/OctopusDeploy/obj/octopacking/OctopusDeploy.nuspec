@@ -1,0 +1,12 @@
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>EMIS.Database.OctopusDeploy</id>
+    <version>1.0.0.0</version>
+    <authors>Phil Austin</authors>
+    <description>NuGet package for DB</description>
+  </metadata>
+  <files>
+    <file src=".\bin\Debug\OctopusDeploy.dacpac" />
+    <file src="OctopusDeploy.local.publish.xml" />
+  </files>
+</package>
