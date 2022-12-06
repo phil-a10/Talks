@@ -1,52 +1,69 @@
 USE AdventureWorks2019;
 
--- Requirement: All employees, departments and rates
+SET STATISTICS IO, TIME ON;
 
+-- Requirement: All employees, rates, joined before 1/1/2010
 -- Following naive join returns duplicates:
 
-SELECT	edh.BusinessEntityID,
+SELECT	eph.BusinessEntityID,
+		p.NameStyle,
+		p.Title,
+		p.FirstName,
+		p.MiddleName,
+		p.LastName,
 		eph.RateChangeDate,
 		eph.Rate
 FROM	[HumanResources].[EmployeeDepartmentHistory] edh
-INNER JOIN [HumanResources].[EmployeePayHistory] eph ON edh.BusinessEntityID = eph.BusinessEntityID;
+INNER JOIN [HumanResources].[EmployeePayHistory] eph ON edh.BusinessEntityID = eph.BusinessEntityID
+INNER JOIN Person.Person p ON edh.BusinessEntityID = p.BusinessEntityID
+WHERE	edh.[StartDate] < '20100101'
+ORDER BY eph.BusinessEntityID;
 
-DBCC FREEPROCCACHE; 
-DBCC DROPCLEANBUFFERS; 
-
--- distinct will remove duplicates - but at a cost:
--- as an aside - note how the query is evaluated
-
-SELECT	DISTINCT edh.BusinessEntityID,
+-- distinct will remove duplicates - but at a cost - note how the query is evaluated
+SELECT	DISTINCT
+		eph.BusinessEntityID,
+		p.NameStyle,
+		p.Title,
+		p.FirstName,
+		p.MiddleName,
+		p.LastName,
 		eph.RateChangeDate,
 		eph.Rate
 FROM	[HumanResources].[EmployeeDepartmentHistory] edh
-INNER JOIN [HumanResources].[EmployeePayHistory] eph ON edh.BusinessEntityID = eph.BusinessEntityID;
+INNER JOIN [HumanResources].[EmployeePayHistory] eph ON edh.BusinessEntityID = eph.BusinessEntityID
+INNER	JOIN Person.Person p ON edh.BusinessEntityID = p.BusinessEntityID
+WHERE	edh.[StartDate] < '20100101'
+ORDER BY eph.BusinessEntityID;
 
--- this also removes duplicates - because we've understand how the data works - at a much lower cost:
+-- note the memory grant
 
-DBCC FREEPROCCACHE;
-DBCC DROPCLEANBUFFERS;
+-- this also removes duplicates - because we've understand how the data works - at a lower cost:
 
-SELECT	edh.BusinessEntityID,
+SELECT	eph.BusinessEntityID,
+		p.NameStyle,
+		p.Title,
+		p.FirstName,
+		p.MiddleName,
+		p.LastName,
 		eph.RateChangeDate,
 		eph.Rate
-FROM	[HumanResources].[EmployeeDepartmentHistory] edh
+FROM	(
+		-- in this case we're only interested in when people started therefore:
+		SELECT	BusinessEntityID, MIN(StartDate) MinStartDate
+		FROM	[HumanResources].[EmployeeDepartmentHistory]
+		GROUP BY
+				BusinessEntityID
+		)edh
 INNER JOIN [HumanResources].[EmployeePayHistory] eph ON edh.BusinessEntityID = eph.BusinessEntityID 
-														AND edh.StartDate <= eph.RateChangeDate 
-														AND ISNULL(edh.EndDate, '29990101') > eph.RateChangeDate;
+INNER JOIN Person.Person p ON edh.BusinessEntityID = p.BusinessEntityID
+WHERE	edh.[MinStartDate] < '20100101'
+ORDER BY eph.BusinessEntityID
 
--- BUT! Distinct not always bad
+
+
+-- BUT! Distinct not always 'bad'
 
 -- Requirement: find employees who started in the last 15 years
-
-SELECT e.[NationalIDNumber]
-      ,e.[LoginID]
-      ,e.[JobTitle]
-      ,e.[BirthDate]
-  FROM [HumanResources].[Employee] e
-  INNER JOIN [HumanResources].[EmployeeDepartmentHistory] edh ON e.BusinessEntityID = edh.BusinessEntityID
-  WHERE StartDate > DATEADD(YEAR, -15, GETDATE() )
-  
 
 -- DISTINCT will remove the duplicates - but what is 'missing' from the Query Plan? And why?
 
@@ -57,4 +74,12 @@ SELECT	DISTINCT	e.[NationalIDNumber]
 FROM [HumanResources].[Employee] e
 INNER JOIN [HumanResources].[EmployeeDepartmentHistory] edh ON e.BusinessEntityID = edh.BusinessEntityID
 WHERE StartDate > DATEADD(YEAR, -15, GETDATE() )
- 
+
+
+
+
+
+
+
+-- HumanResources.Employee has a clustered index - so doesn't need a Distinct Sort operator
+-- Also we are de-duping only columns from one table

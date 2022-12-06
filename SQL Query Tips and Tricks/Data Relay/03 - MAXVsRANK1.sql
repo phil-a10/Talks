@@ -1,7 +1,7 @@
 USE AdventureWorks2019;
 
 -- set-up
-IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Production_Product_NameLastLetter')
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TransactionHistory_ProductID_01')
 DROP INDEX [Production].[TransactionHistory].[IX_TransactionHistory_ProductID_01]
 --end set-up
 

@@ -5,6 +5,8 @@
 
 -- demo:
 
+USE [AdventureWorks2019];
+
 SET STATISTICS TIME ON;
 
 DBCC DROPCLEANBUFFERS;
