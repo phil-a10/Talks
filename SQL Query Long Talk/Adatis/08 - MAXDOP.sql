@@ -64,7 +64,7 @@ SELECT  wo.[DueDate],
         MAX(wo.[ScrappedQty]) MaxScrappedQty
 FROM    [Production].[WorkOrder] wo
 GROUP BY wo.[DueDate]
-ORDER BY wo.[DueDate] OPTION (MAXDOP 2)
+ORDER BY wo.[DueDate] OPTION (MAXDOP 1)
 
 -- reset the threshold:
 EXEC sys.sp_configure N'show advanced options', N'1'  RECONFIGURE WITH OVERRIDE

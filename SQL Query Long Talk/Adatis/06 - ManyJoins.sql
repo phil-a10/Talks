@@ -2,6 +2,9 @@ USE AdventureWorks2019;
 
 SET STATISTICS TIME ON;
 
+DBCC DROPCLEANBUFFERS;
+DBCC FREEPROCCACHE;
+
 -- joining 2 tables together SQL has to evaluate 2 possible execution plans
 -- adding tables increases this exponentially - particularly if tables are joined in multiple different ways (ie table A to table B, B to C, B to D, D to E)
 -- joining 12 tables results in 28,158,588,057,600 possible execution plans ((2 * 12) - 2)! / 11!
