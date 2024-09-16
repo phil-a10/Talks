@@ -1,0 +1,98 @@
+https://medium.com/illumination/top-free-resources-for-learning-pyspark-in-self-paced-learning-9dfc26748eea
+
+Install Python
+
+Set path
+
+open Windows Terminal
+	- cd to user folder
+	- create folder & python file - hello-world.py
+	- open python file in notepad
+	- print('hello world')
+	- from terminal python hello-world.py
+
+Run hello-world.py from VS Code in debug
+Demo editing file and running in debug
+
+Demo python from shell
+
+Install Pip
+Install Spark from Pip
+
+Data & Databases
+Concepts to Learn: Data types, databases (SQL and NoSQL), data structures.
+
+Tools/Resources:
+Azure SQL Database - free tier available
+Cosmos DB: Explore NoSQL databases with a limited free tier on Azure.
+
+
+Anaconda?
+
+Jupyter notebooks?
+
+--------------------------------------------------------------------
+From Co Pilot
+--------------------------------------------------------------------
+
+Learning Data Engineering with Azure: A Free Tools Roadmap
+
+Introduction
+Data Engineering is pivotal in extracting insights and value from data. Microsoft Azure offers a suite of tools that can help budding data engineers learn and apply their skills in a cloud environment. This roadmap will guide you through using Azure's free tier and other free resources to kickstart your data engineering journey.
+
+Worth pointing out this is an Azure/Microsoft-based talk not covering AWS/GCP
+
+Step 1: Data Pipeline and ETL Processes
+Concepts to Learn: ETL processes, batch and real-time data processing.
+Tools/Resources:
+Azure Data Factory: Get hands-on with data integration service to create ETL and ELT pipelines using the free tier.
+Anaconda: Spark - mount data
+Stream Analytics: Experiment with real-time data stream processing.
+Demo?
+
+Step 2: Data Infrastructure and Cloud Services
+Concepts to Learn: Data lakes, data warehouses, cloud services for data engineering.
+Tools/Resources:
+Azure Synapse Analytics: Dive into big data and analytics.
+Azure Data Lake Storage: Explore data lake solutions with a hierarchical file system.
+
+Step 3: Big Data Technologies
+Concepts to Learn: Distributed computing concepts, big data analytics.
+Tools/Resources:
+Azure Databricks: Explore big data processing with a limited free tier.
+HDInsight: Practice Hadoop and Spark on Azure (note: not free, but offers a low-cost option).
+
+Step 4: Programming for Data Engineering
+Concepts to Learn: Python for data manipulation and automation scripts.
+Tools/Resources:
+GitHub: 
+Azure Notebooks: Practice Python in a cloud-based Jupyter notebook.
+VS Code: Use this free IDE for Python development, with extensions for Azure.
+Libraries: pandas, dbt, AirFlow
+Demo?
+
+Step 5: Grasping the Basics of Data
+Concepts to Learn: Data types, databases (SQL and NoSQL), data structures.
+Tools/Resources:
+SQL Express: T-SQL
+Azure SQL Database: Utilize Azure's free tier to practice SQL queries.
+Cosmos DB: Explore NoSQL databases with a limited free tier on Azure.
+Demo?
+
+Step 6: Data Visualization and Reporting
+Concepts to Learn: Techniques for data reporting and visualization.
+Tools/Resources:
+Excel: Free? Possible start to Data Viz
+Power BI: Create data visualizations and reports with a free version.
+Demo?
+
+Step 7: Next steps:
+Real-world project
+Azure DevOps: Use for project planning, collaboration, and deployment.
+Source control/Git management - branching/merging
+Cloud services
+Modelling
+
+
+Conclusion
+Leveraging Azure's free tier and resources can provide a solid foundation in data engineering. The key is to practice consistently, build projects that showcase your skills, and stay updated with the latest Azure services and tools.
