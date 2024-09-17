@@ -4,6 +4,10 @@
 # Set your desired resource group and storage account name
 $resourceGroup="dataengfreerg"
 $storageAccountName="sadataengfree"
+$appregname="spndataengfree"
+
+# Get the current subscription ID
+$subscriptionId=$(az account show --query id --output tsv)
 
 # Create a storage account
 az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2
@@ -14,16 +18,33 @@ az storage container create --name "dataengfree" --account-name $storageAccountN
 # Create a directory in the container
 az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
 
-### Define app registration name, etc.
-$appregname=myappregtest1
-clientid=$(az ad app create --display-name $appregname --query appId --output tsv)
-objectid=$(az ad app show --id $clientid --query Id --output tsv)
+# Define app registration name, etc.
+$clientId=$(az ad app create --display-name $appregname --query appId --output tsv)
+
+$clientId
+
+# Create a service principal using the appid
+$spId=$(az ad sp create --id $clientId --output tsv)
+$objectId=$(az ad sp show --id $clientId --query Id --output tsv)
+
+$objectId
+$appregname
+
+az ad sp list --display-name $appregname
+
+# show the service principal
+az ad sp show --id $clientId
+
+# Assign the Storage Blob Data Contributor role to the service principal
+az role assignment create --assignee $objectId --role "Storage Blob Data Contributor" --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
 
 # Create a Data Factory workspace
 az datafactory create --resource-group $resourceGroup --factory-name "adfdataengfree" --location uksouth
 
 # Get the storage account connection string
 $storageAccountConnection = $(az storage account show-connection-string --resource-group $resourceGroup --name "sadataengfree" --key key1)
+
+
 
 # Create a linked service JSON file
 $properties = @{
