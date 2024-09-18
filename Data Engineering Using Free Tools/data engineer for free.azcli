@@ -1,16 +1,21 @@
 
 # First - login!
 
+# To run this in VSCode you need to install the Azure CLI extension
+# CLI will require extensions for some commands
+# Install the extensions as prompted
+
 # Set your desired resource group and storage account name
 $resourceGroup="dataengfreerg"
 $storageAccountName="sadataengfree"
-$appregname="spndataengfree"
-
-# Get the current subscription ID
-$subscriptionId=$(az account show --query id --output tsv)
+$appRegistration="spndataengfree"
 
 # Create a storage account
 az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2
+
+# get the storage account id
+# this gets used to scope the role assignment below
+$storageAccountId=$(az storage account show --name $storageAccountName --resource-group $resourceGroup --query id --output tsv)
 
 # Create a container in the storage account
 az storage container create --name "dataengfree" --account-name $storageAccountName
@@ -19,32 +24,21 @@ az storage container create --name "dataengfree" --account-name $storageAccountN
 az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
 
 # Define app registration name, etc.
-$clientId=$(az ad app create --display-name $appregname --query appId --output tsv)
+# needed for the service principal
+$appId=$(az ad app create --display-name $appRegistration --query appId --output tsv)
 
-$clientId
+# Create the service principal
+# needed to connect databricks to the storage account
+az ad sp create --id $appId
 
-# Create a service principal using the appid
-$spId=$(az ad sp create --id $clientId --output tsv)
-$objectId=$(az ad sp show --id $clientId --query Id --output tsv)
-
-$objectId
-$appregname
-
-az ad sp list --display-name $appregname
-
-# show the service principal
-az ad sp show --id $clientId
-
-# Assign the Storage Blob Data Contributor role to the service principal
-az role assignment create --assignee $objectId --role "Storage Blob Data Contributor" --scope "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+# Assign a role to the service principal
+az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --scope $storageAccountId
 
 # Create a Data Factory workspace
 az datafactory create --resource-group $resourceGroup --factory-name "adfdataengfree" --location uksouth
 
 # Get the storage account connection string
-$storageAccountConnection = $(az storage account show-connection-string --resource-group $resourceGroup --name "sadataengfree" --key key1)
-
-
+$storageAccountConnection = $(az storage account show-connection-string --resource-group $resourceGroup --name $storageAccountName --key key1)
 
 # Create a linked service JSON file
 $properties = @{
@@ -57,3 +51,5 @@ $properties = @{
 # Create a Data Factory linked service to the storage account
 az datafactory linked-service create --resource-group $resourceGroup --factory-name "adfdataengfree" --name "storage account adf demo" --properties "linkedService.json"
 
+# delete JSON file
+Remove-Item -Path "linkedService.json"
