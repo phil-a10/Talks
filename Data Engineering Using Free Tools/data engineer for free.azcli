@@ -5,13 +5,14 @@
 # CLI will require extensions for some commands
 # Install the extensions as prompted
 
-# Set your desired resource group and storage account name
+# Set your desired resource group and storage account and app name
+# Using variables makes it easier to change these values
 $resourceGroup="dataengfreerg"
 $storageAccountName="sadataengfree"
 $appRegistration="spndataengfree"
 
 # Create a storage account
-az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2
+az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2 --hierarchical-namespace true
 
 # get the storage account id
 # this gets used to scope the role assignment below
@@ -40,16 +41,41 @@ az datafactory create --resource-group $resourceGroup --factory-name "adfdataeng
 # Get the storage account connection string
 $storageAccountConnection = $(az storage account show-connection-string --resource-group $resourceGroup --name $storageAccountName --key key1)
 
+$storageAccountConnectionKey = $(az storage account keys list --resource-group $resourceGroup --account-name $storageAccountName --query "[0].value" --output tsv)
+
 # Create a linked service JSON file
 $properties = @{
-    type = "AzureStorage"
+    type = "AzureBlobFS"
     typeProperties = @{
-        connectionString = "$storageAccountConnection"
+        "url"= "https://$storageAccountName.dfs.core.windows.net/"
+        "encryptedCredential"= @{
+            "type"= "AccountKey"
+            "accountKey"= "$storageAccountConnectionKey"
+        }
     }
 }|ConvertTo-Json | Out-File -FilePath "linkedService.json"
-
+# connectionString = "DefaultEndpointsProtocol=https;AccountName=$storageAccountName;AccountKey=$storageAccountConnectionKey;EndpointSuffix=core.windows.net"
 # Create a Data Factory linked service to the storage account
 az datafactory linked-service create --resource-group $resourceGroup --factory-name "adfdataengfree" --name "storage account adf demo" --properties "linkedService.json"
 
+$sqlServerName="sqldataengfree"
+$sqlDatabaseName="dbdataengfreesql"
+$sqlServerAdminUser="sqladmin"
+$sqlServerAdminPassword="Password123"
+
+# Get the SQL Server connection string
+$sqlConnectionString = "Server=tcp:$sqlServerName.database.windows.net,1433;Initial Catalog=$sqlDatabaseName;Persist Security Info=False;User ID=$sqlServerAdminUser;Password=$sqlServerAdminPassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+
+# Create a linked service JSON file for SQL Database
+$sqlProperties = @{
+    type = "AzureSqlDatabase"
+    typeProperties = @{
+        connectionString = "$sqlConnectionString"
+    }
+}|ConvertTo-Json | Out-File -FilePath "linkedServiceSql.json"
+
+# Create a Data Factory linked service to the SQL Database
+az datafactory linked-service create --resource-group $resourceGroup --factory-name "adfdataengfree" --name "sql database adf demo" --properties "linkedServiceSql.json"
+
 # delete JSON file
-Remove-Item -Path "linkedService.json"
+Remove-Item -Path "linkedServiceSql.json"
