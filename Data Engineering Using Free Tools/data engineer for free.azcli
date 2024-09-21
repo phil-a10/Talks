@@ -24,39 +24,8 @@ az storage container create --name "dataengfree" --account-name $storageAccountN
 # Create a directory in the container
 az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
 
-# Define app registration name, etc.
-# needed for the service principal
-$appId=$(az ad app create --display-name $appRegistration --query appId --output tsv)
-
-# Create the service principal
-# needed to connect databricks to the storage account
-az ad sp create --id $appId
-
-# Assign a role to the service principal
-az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --scope $storageAccountId
-
 # Create a Data Factory workspace
 az datafactory create --resource-group $resourceGroup --factory-name "adfdataengfree" --location uksouth
-
-# Get the storage account connection string
-$storageAccountConnection = $(az storage account show-connection-string --resource-group $resourceGroup --name $storageAccountName --key key1)
-
-$storageAccountConnectionKey = $(az storage account keys list --resource-group $resourceGroup --account-name $storageAccountName --query "[0].value" --output tsv)
-
-# Create a linked service JSON file
-$properties = @{
-    type = "AzureBlobFS"
-    typeProperties = @{
-        "url"= "https://$storageAccountName.dfs.core.windows.net/"
-        "encryptedCredential"= @{
-            "type"= "AccountKey"
-            "accountKey"= "$storageAccountConnectionKey"
-        }
-    }
-}|ConvertTo-Json | Out-File -FilePath "linkedService.json"
-# connectionString = "DefaultEndpointsProtocol=https;AccountName=$storageAccountName;AccountKey=$storageAccountConnectionKey;EndpointSuffix=core.windows.net"
-# Create a Data Factory linked service to the storage account
-az datafactory linked-service create --resource-group $resourceGroup --factory-name "adfdataengfree" --name "storage account adf demo" --properties "linkedService.json"
 
 $sqlServerName="sqldataengfree"
 $sqlDatabaseName="dbdataengfreesql"
@@ -79,3 +48,26 @@ az datafactory linked-service create --resource-group $resourceGroup --factory-n
 
 # delete JSON file
 Remove-Item -Path "linkedServiceSql.json"
+
+# Define app registration name, etc.
+# needed for the service principal
+$appId=$(az ad app create --display-name $appRegistration --query appId --output tsv)
+
+# Create the service principal
+# needed to connect databricks to the storage account
+az ad sp create --id $appId
+
+# Assign a role to the service principal
+az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --scope $storageAccountId
+
+# to connect to the storage account from Databricks
+
+# Get the object ID of the service principal created above
+az ad app list --display-name $appRegistration --query "[0].appId" --output tsv
+
+# Create a secret for the service principal
+$spnPassword=$(az ad sp credential reset --id $appId --query password --output tsv)
+echo $spnPassword
+
+# get the tenant ID
+az account show --query "[tenantId]" --output tsv
