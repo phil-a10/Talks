@@ -1,5 +1,7 @@
 
 # First - login!
+# az login - use this command to login to your Azure account
+# az account show - use this command to show the current account
 
 # To run this in VSCode you need to install the Azure CLI extension
 # CLI will require extensions for some commands
