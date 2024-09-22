@@ -1,34 +1,3 @@
-
-# First - login!
-# az login - use this command to login to your Azure account
-# az account show - use this command to show the current account
-
-# To run this in VSCode you need to install the Azure CLI extension
-# CLI will require extensions for some commands
-# Install the extensions as prompted
-
-# Set your desired resource group and storage account and app name
-# Using variables makes it easier to change these values
-$resourceGroup="dataengfreerg"
-$storageAccountName="sadataengfree"
-$appRegistration="spndataengfree"
-
-# Create a storage account
-az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2 --hierarchical-namespace true
-
-# get the storage account id
-# this gets used to scope the role assignment below
-$storageAccountId=$(az storage account show --name $storageAccountName --resource-group $resourceGroup --query id --output tsv)
-
-# Create a container in the storage account
-az storage container create --name "dataengfree" --account-name $storageAccountName
-
-# Create a directory in the container
-az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
-
-# Create a Data Factory workspace
-az datafactory create --resource-group $resourceGroup --factory-name "adfdataengfree" --location uksouth
-
 $sqlServerName="sqldataengfree"
 $sqlDatabaseName="dbdataengfreesql"
 $sqlServerAdminUser="sqladmin"
