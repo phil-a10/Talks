@@ -2,10 +2,9 @@ print('hello world')
 
 # list of tuples
 organisers = [
-        ('Dominic', 'Windsor'),
+        ('Dominic', 'Winsor'),
         ('James', 'Yarrow'),
-        ('Anna-Marie', 'Wykes'),
-        ('Niall', 'Langley')
+        ('Anna-Marie', 'Wykes')
         ]
 
 # import tabulate
