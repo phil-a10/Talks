@@ -1,21 +1,7 @@
-$sqlServerName="sqldataengfree"
-$sqlDatabaseName="dbdataengfreesql"
-$sqlServerAdminUser="sqladmin"
-$sqlServerAdminPassword="Password123"
+$resourceGroup="dataengfreerg"
+$storageAccountName="sadataengfree"
 
-# Get the SQL Server connection string
-$sqlConnectionString = "Server=tcp:$sqlServerName.database.windows.net,1433;Initial Catalog=$sqlDatabaseName;Persist Security Info=False;User ID=$sqlServerAdminUser;Password=$sqlServerAdminPassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-
-# Create a linked service JSON file for SQL Database
-$sqlProperties = @{
-    type = "AzureSqlDatabase"
-    typeProperties = @{
-        connectionString = "$sqlConnectionString"
-    }
-}|ConvertTo-Json | Out-File -FilePath "linkedServiceSql.json"
-
-# Create a Data Factory linked service to the SQL Database
-az datafactory linked-service create --resource-group $resourceGroup --factory-name "adfdataengfree" --name "sql database adf demo" --properties "linkedServiceSql.json"
+$appRegistration="spndataengfree"
 
 # delete JSON file
 Remove-Item -Path "linkedServiceSql.json"
@@ -27,6 +13,10 @@ $appId=$(az ad app create --display-name $appRegistration --query appId --output
 # Create the service principal
 # needed to connect databricks to the storage account
 az ad sp create --id $appId
+
+# get the storage account id
+# this gets used to scope the role assignment below
+$storageAccountId=$(az storage account show --name $storageAccountName --resource-group $resourceGroup --query id --output tsv)
 
 # Assign a role to the service principal
 az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --scope $storageAccountId
