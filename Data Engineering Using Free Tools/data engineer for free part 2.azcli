@@ -3,9 +3,6 @@ $storageAccountName="sadataengfree"
 
 $appRegistration="spndataengfree"
 
-# delete JSON file
-Remove-Item -Path "linkedServiceSql.json"
-
 # Define app registration name, etc.
 # needed for the service principal
 $appId=$(az ad app create --display-name $appRegistration --query appId --output tsv)
