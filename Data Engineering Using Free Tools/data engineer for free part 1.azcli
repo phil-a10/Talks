@@ -9,8 +9,12 @@
 
 # Set your desired resource group and storage account and app name
 # Using variables makes it easier to change these values
-$resourceGroup="dataengfreerg"
+$resourceGroup="dataengfreerg2"
 $storageAccountName="sadataengfree3"
+
+# Create a resource group
+# This is a logical container for resources
+az group create --name $resourceGroup --location uksouth
 
 # Create a storage account Standard Local Redundant Storage (LRS) with a hierarchical namespace
 az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2 --hierarchical-namespace true
