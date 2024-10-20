@@ -9,18 +9,23 @@
 
 # Set your desired resource group and storage account and app name
 # Using variables makes it easier to change these values
-$resourceGroup="dataengfreerg2"
-$storageAccountName="sadataengfree3"
+$resourceGroupName="dataengfreerg"
+$storageAccountName="sadataengfree"
 
 # Create a resource group
 # This is a logical container for resources
 az group create --name $resourceGroup --location uksouth
 
 # Create a storage account Standard Local Redundant Storage (LRS) with a hierarchical namespace
-az storage account create --name $storageAccountName  --resource-group $resourceGroup --location uksouth --sku Standard_LRS --kind StorageV2 --hierarchical-namespace true
+az storage account create --name $storageAccountName  --resource-group $resourceGroupName --location uksouth --sku Standard_LRS --kind StorageV2 --hierarchical-namespace true
+
+$storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" --output tsv)
 
 # Create a container in the storage account
-az storage container create --name "dataengfree" --account-name $storageAccountName
+az storage container create --name "dataengfree" --account-name $storageAccountName --account-key $storageAccountKey
+
+az storage share create --account-name $storageAccountName --name "fsdataengfree"
+#az storage fs create --name "fsdataengfree" --account-name $storageAccountName --account-key $storageAccountKey
 
 # Create a directory in the container
 az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
@@ -29,5 +34,5 @@ az storage fs directory create --account-name $storageAccountName --file-system 
 
 
 # Create a Data Factory workspace
-az datafactory create --resource-group $resourceGroup --factory-name "adfdataengfree" --location uksouth
+az datafactory create --resource-group $resourceGroupName --factory-name "adfdataengfree" --location uksouth
 
