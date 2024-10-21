@@ -10,12 +10,12 @@ conda install azure-identity
 # can also use Pip to install packages
 pip install azure-identity
 
-# activate the new environment
-conda activate myenv2
-
 # check conda environments
 # note that the active environment is marked with an asterisk (*)
 conda env list
+
+# activate the new environment
+conda activate dataengforfree_env
 
 python --version
 
