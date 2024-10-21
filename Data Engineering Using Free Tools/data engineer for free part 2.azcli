@@ -16,12 +16,11 @@ $appId
 az ad sp create --id $appId
 
 # Show the service principal
-az ad sp list --display-name $appRegistration --query 
+az ad sp list --display-name $appRegistration  --query "[].appDisplayName" --output tsv
 
 # get the storage account id
 # this gets used to scope the role assignment below
 $storageAccountId=$(az storage account show --name $storageAccountName --resource-group $resourceGroup --query id --output tsv)
-
 $storageAccountId
 
 # Assign a role to the service principal
