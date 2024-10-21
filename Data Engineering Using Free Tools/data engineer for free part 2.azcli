@@ -5,11 +5,18 @@ $appRegistration="spndataengfree"
 
 # Define app registration name, etc.
 # needed for the service principal
-$appId=$(az ad app create --display-name $appRegistration --query appId --output tsv)
+az ad app create --display-name $appRegistration
+
+# Show the app registration
+$appId = $(az ad app list --display-name $appRegistration --query "[].appId" --output tsv)
+$appId
 
 # Create the service principal
 # needed to connect databricks to the storage account
 az ad sp create --id $appId
+
+# Show the service principal
+az ad sp list --display-name $appRegistration --query 
 
 # get the storage account id
 # this gets used to scope the role assignment below
@@ -20,7 +27,7 @@ $storageAccountId
 # Assign a role to the service principal
 az role assignment create --assignee $appId --role "Storage Blob Data Contributor" --scope $storageAccountId
 
-# to connect to the storage account from Databricks
+# to connect to the storage account from Databricks we will need
 
 # Get the object ID of the service principal created above
 az ad app list --display-name $appRegistration --query "[0].appId" --output tsv
