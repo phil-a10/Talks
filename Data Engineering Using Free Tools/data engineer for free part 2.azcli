@@ -34,6 +34,8 @@ az ad app list --display-name $appRegistration --query "[0].appId" --output tsv
 # Create a secret for the service principal
 $spnPassword=$(az ad sp credential reset --id $appId --query password --output tsv)
 echo $spnPassword
+az ad sp credential list --id $appId
+
 
 # get the tenant ID
 az account show --query "[tenantId]" --output tsv

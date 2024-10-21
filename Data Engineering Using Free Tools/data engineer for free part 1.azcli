@@ -28,14 +28,15 @@ az storage account show --name $storageAccountName --resource-group $resourceGro
 $storageAccountKey=$(az storage account keys list --resource-group $resourceGroupName --account-name $storageAccountName --query "[0].value" --output tsv)
 $storageAccountKey
 
-# Create a container in the storage account
+# Create a blob container in the storage account
+# This is just the root folder for the blob storage
 az storage container create --name "dataengfree" --account-name $storageAccountName --account-key $storageAccountKey
 az storage container list --account-name $storageAccountName --account-key $storageAccountKey --query "[].name"
 
 # Create a directory in the container
 az storage fs directory create --account-name $storageAccountName --file-system "dataengfree" --name "RAW"
-az storage fs directory list --account-name $storageAccountName --file-system "dataengfree" --account-key $storageAccountKey
+az storage fs directory list --account-name $storageAccountName --file-system "dataengfree" --query "[].name" --output tsv
 
 # Create a fileshare for the 'source' data
 az storage share create --account-name $storageAccountName --name "fsdataengfree"
-az storage share list --account-name $storageAccountName --account-key $storageAccountKey
+az storage share list --account-name $storageAccountName --account-key $storageAccountKey --query "[].name"
